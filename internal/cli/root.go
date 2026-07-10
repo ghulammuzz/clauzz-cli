@@ -1,6 +1,6 @@
 // Package cmd wires the clauzz CLI. All logic lives in internal packages;
 // commands here only parse arguments, call into them, and format output.
-package cmd
+package cli
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 )
 
 // version is overridden at release time via
-// -ldflags "-X github.com/ghulammuzz/clauzz-cli/cmd.version=...".
+// -ldflags "-X github.com/ghulammuzz/clauzz-cli/internal/cli.version=...".
 var version = "dev"
 
 var rootCmd = &cobra.Command{

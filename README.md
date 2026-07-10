@@ -21,13 +21,13 @@ Windows is not supported (resume uses `exec(2)`).
 With Go installed:
 
 ```sh
-go install github.com/ghulammuzz/clauzz-cli@latest
+go install github.com/ghulammuzz/clauzz-cli/cmd/clauzz@latest
 ```
 
 Or build from source:
 
 ```sh
-go build -o clauzz . && mv clauzz /usr/local/bin/
+go build -o clauzz ./cmd/clauzz && mv clauzz /usr/local/bin/
 ```
 
 ### Uninstall
@@ -53,7 +53,8 @@ mkdir -p ~/.claude/commands/clauzz && cp claude-command/*.md ~/.claude/commands/
 |---------|--------------|
 | `clauzz` | Interactive picker. Enter resumes the session via `claude --resume` in its directory |
 | `clauzz add {name}` | Register the current Claude session under a custom name |
-| `clauzz list` | Plain list of registered sessions, grouped by directory |
+| `clauzz list` | Plain list of registered sessions, grouped by directory; `ls` is an alias |
+| `clauzz prune` | Remove all `[gone]` entries (sessions whose transcript was deleted) |
 | `clauzz rename {id-prefix} {new-name}` | Rename a registered session |
 | `clauzz context {id-prefix}` | Print a context digest of a session (used by `/clauzz:context`) |
 | `clauzz rm {id-prefix}` | Remove a session from the registry (min 4 chars of the session ID); `delete` is an alias |

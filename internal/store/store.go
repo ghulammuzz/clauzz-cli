@@ -158,6 +158,20 @@ func (r *Registry) RenameByPrefix(prefix, newName string) (Entry, error) {
 	return r.Sessions[i], nil
 }
 
+// RemoveIf removes every entry matching pred and returns the removed entries.
+func (r *Registry) RemoveIf(pred func(Entry) bool) []Entry {
+	var kept, removed []Entry
+	for _, e := range r.Sessions {
+		if pred(e) {
+			removed = append(removed, e)
+		} else {
+			kept = append(kept, e)
+		}
+	}
+	r.Sessions = kept
+	return removed
+}
+
 // GroupedByDir returns entries grouped by directory, directories sorted
 // alphabetically and entries newest first.
 func (r *Registry) GroupedByDir() []DirGroup {

@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 import (
 	"fmt"
@@ -10,9 +10,10 @@ import (
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List registered sessions grouped by directory",
-	Args:  cobra.NoArgs,
+	Use:     "list",
+	Aliases: []string{"ls"},
+	Short:   "List registered sessions grouped by directory",
+	Args:    cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		reg, err := store.Load()
 		if err != nil {

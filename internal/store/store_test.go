@@ -165,6 +165,25 @@ func TestGroupedByDir(t *testing.T) {
 	}
 }
 
+func TestRemoveIf(t *testing.T) {
+	r := &Registry{Version: 1}
+	r.Add(entry("keep", "aaa-1", "/app", time.Now()))
+	r.Add(entry("drop", "bbb-2", "/app", time.Now()))
+	r.Add(entry("drop2", "bbb-3", "/app", time.Now()))
+
+	removed := r.RemoveIf(func(e Entry) bool { return e.SessionID[:3] == "bbb" })
+
+	if len(removed) != 2 || removed[0].Name != "drop" || removed[1].Name != "drop2" {
+		t.Errorf("removed = %+v", removed)
+	}
+	if len(r.Sessions) != 1 || r.Sessions[0].Name != "keep" {
+		t.Errorf("kept = %+v", r.Sessions)
+	}
+	if got := r.RemoveIf(func(Entry) bool { return false }); got != nil {
+		t.Errorf("no-match must return nil, got %+v", got)
+	}
+}
+
 func TestShortID(t *testing.T) {
 	if got := ShortID("625e4b2e-949e-45e0"); got != "625e4b2e" {
 		t.Errorf("got %q", got)
