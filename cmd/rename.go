@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -18,7 +19,7 @@ var renameCmd = &cobra.Command{
 		if len(args) != 2 {
 			return cmd.Help()
 		}
-		prefix, newName := args[0], args[1]
+		prefix, newName := args[0], strings.TrimSpace(args[1])
 		if len(prefix) < 4 {
 			return fmt.Errorf("prefix %q too short, use at least 4 characters", prefix)
 		}

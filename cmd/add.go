@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -22,7 +23,10 @@ var addCmd = &cobra.Command{
 		if len(args) != 1 {
 			return cmd.Help()
 		}
-		name := args[0]
+		name := strings.TrimSpace(args[0])
+		if name == "" {
+			return fmt.Errorf("session name must not be empty")
+		}
 		cwd, err := os.Getwd()
 		if err != nil {
 			return err
