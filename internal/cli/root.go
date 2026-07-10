@@ -1,11 +1,13 @@
-// Package cmd wires the clauzz CLI. All logic lives in internal packages;
-// commands here only parse arguments, call into them, and format output.
+// Package cli wires the clauzz CLI. All logic lives in the other internal
+// packages; commands here only parse arguments, call into them, and format
+// output.
 package cli
 
 import (
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime/debug"
 	"syscall"
 
 	"github.com/spf13/cobra"
@@ -16,7 +18,19 @@ import (
 
 // version is overridden at release time via
 // -ldflags "-X github.com/ghulammuzz/clauzz-cli/internal/cli.version=...".
+// For go install builds it falls back to the module version from build info.
 var version = "dev"
+
+func init() {
+	if version != "dev" {
+		return
+	}
+	if info, ok := debug.ReadBuildInfo(); ok {
+		if v := info.Main.Version; v != "" && v != "(devel)" {
+			rootCmd.Version = v
+		}
+	}
+}
 
 var rootCmd = &cobra.Command{
 	Use:     "clauzz",
