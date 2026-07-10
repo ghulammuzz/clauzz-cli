@@ -4,8 +4,10 @@
 
 Workspace context manager for AI coding agents.
 
-AI coding agents like Claude Code scatter your work across sessions identified only by anonymous UUIDs.
-`clauzz` turns them into a managed workspace: give sessions memorable names, list them grouped by directory, resume any of them in one keypress, and carry context from one session into another.
+AI coding agents scatter your work across sessions identified only by anonymous UUIDs.
+`clauzz` turns them into a managed workspace: give sessions memorable names, list them grouped by directory, search across all of them, resume any of them in one keypress, and carry context from one session into another.
+
+Today clauzz supports Claude Code; adapters for other agents are on the roadmap.
 
 ## Install
 
@@ -55,6 +57,7 @@ mkdir -p ~/.claude/commands/clauzz && cp claude-command/*.md ~/.claude/commands/
 | `clauzz add {name}` | Register the current Claude session under a custom name |
 | `clauzz list` | Plain list of registered sessions, grouped by directory; `ls` is an alias |
 | `clauzz prune` | Remove all `[gone]` entries (sessions whose transcript was deleted) |
+| `clauzz search {query}` | Full-text search across every session on the machine, registered or not |
 | `clauzz rename {id-prefix} {new-name}` | Rename a registered session |
 | `clauzz context {id-prefix}` | Print a context digest of a session (used by `/clauzz:context`) |
 | `clauzz rm {id-prefix}` | Remove a session from the registry (min 4 chars of the session ID); `delete` is an alias |
