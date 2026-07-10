@@ -23,6 +23,7 @@ type Message struct {
 // Transcript is the filtered content of one session.
 type Transcript struct {
 	Title    string
+	Cwd      string // working directory of the session, from the first line carrying one
 	Messages []Message
 }
 
@@ -44,6 +45,7 @@ type contentBlock struct {
 type line struct {
 	Type        string `json:"type"`
 	AITitle     string `json:"aiTitle"`
+	Cwd         string `json:"cwd"`
 	IsMeta      bool   `json:"isMeta"`
 	IsSidechain bool   `json:"isSidechain"`
 	Message     struct {
@@ -86,6 +88,9 @@ func (t *Transcript) addLine(raw string) {
 	var l line
 	if err := json.Unmarshal([]byte(raw), &l); err != nil {
 		return // tolerate unknown or corrupt lines
+	}
+	if t.Cwd == "" && l.Cwd != "" {
+		t.Cwd = l.Cwd
 	}
 	if l.Type == "ai-title" && l.AITitle != "" {
 		t.Title = l.AITitle

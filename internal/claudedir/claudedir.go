@@ -31,6 +31,15 @@ func claudeDir() (string, error) {
 	return filepath.Join(home, ".claude"), nil
 }
 
+// ProjectsRoot returns the directory holding all Claude project directories.
+func ProjectsRoot() (string, error) {
+	base, err := claudeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(base, "projects"), nil
+}
+
 // EncodePath converts an absolute directory path to Claude Code's
 // project-directory name, e.g. "/Users/x/app" -> "-Users-x-app".
 func EncodePath(abs string) string {
