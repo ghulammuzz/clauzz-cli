@@ -28,6 +28,15 @@ Or build from source:
 go build -o clauzz . && mv clauzz /usr/local/bin/
 ```
 
+### Uninstall
+
+```sh
+curl -sSL https://clauzz.muzz-ai.com/uninstall.sh | sh
+```
+
+Removes the binary and the slash commands.
+The session registry at `~/.clauzz` is kept; add `| sh -s -- --purge` to remove it too.
+
 ### Slash command (optional)
 
 To use `/clauzz:add-session {name}`, `/clauzz:context {id-prefix}`, and `/clauzz:list` from inside Claude Code:

@@ -10,4 +10,4 @@
 FROM caddy:2-alpine
 
 COPY deploy/Caddyfile /etc/caddy/Caddyfile
-COPY install.sh /srv/install.sh
+COPY install.sh uninstall.sh /srv/
