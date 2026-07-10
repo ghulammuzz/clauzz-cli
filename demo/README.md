@@ -22,18 +22,20 @@ To change what the demo shows, edit the fixture registry (`demo/fixture/clauzz/s
 From the repository root:
 
 ```sh
-vhs demo/demo.tape
+vhs demo/demo.tape      # overview: list + picker  -> demo/demo.gif
+vhs demo/search.tape    # search case              -> demo/search.gif
+vhs demo/context.tape   # context transfer case    -> demo/context.gif
 ```
 
-Output is written to `demo/demo.gif`. Each run builds the current code and re-executes the real commands against the fixture, so what you see is what users get.
+Each run builds the current code and re-executes the real commands against the fixture, so what you see is what users get.
 
-## 4. What the tape shows
+## 4. What each tape shows
 
-| Scene | Command | Why it sells |
-|-------|---------|--------------|
-| 1 | `clauzz ls` | Named sessions grouped by directory, at a glance |
-| 2 | `clauzz search kafka` | Full-text search across every session on the machine |
-| 3 | `clauzz` | The TUI picker with j/k navigation |
+| Tape | Commands | Why it sells |
+|------|----------|--------------|
+| `demo.tape` | `clauzz ls`, `clauzz` | Named sessions at a glance, TUI picker with j/k navigation |
+| `search.tape` | `clauzz search kafka`, `clauzz search dead letter queue` | Full-text search across every session on the machine |
+| `context.tape` | `clauzz ls`, `clauzz context {id} {focus query}` | The digest `/clauzz:context` injects into an active session |
 
 The picker scene ends with `q` on purpose: pressing enter would exec `claude --resume` and the recording would capture Claude Code taking over the terminal.
 

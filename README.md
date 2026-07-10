@@ -79,6 +79,21 @@ $ clauzz rm 8440
 removed "Task DB Replica" (84409ceb) in /Users/me/code/app
 ```
 
+## Demos
+
+### Search across every session
+
+Which session talked about kafka? `clauzz search` answers from every transcript on the machine, registered in clauzz or not.
+
+![clauzz search demo](demo/search.gif)
+
+### Carry context between sessions
+
+Inside Claude Code, `/clauzz:context {id-prefix} [focus query]` injects a digest of another session into the active one.
+The GIF shows the digest that gets injected: title, user prompts, last messages, and the focus query for Claude to dig into.
+
+![clauzz context demo](demo/context.gif)
+
 ## How it works
 
 - Registry lives at `~/.clauzz/sessions.json`.
