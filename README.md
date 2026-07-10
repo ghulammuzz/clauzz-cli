@@ -18,7 +18,7 @@ Today clauzz supports Claude Code; adapters for other agents are on the roadmap.
 
 ## Features
 
-- **Name your sessions**: `evoucher close-loop` instead of `70c79231-...`.
+- **Name your sessions**: `Task Kafka DLQ` instead of `3f2a8c1e-...`.
 - **Resume in one keypress**: a TUI picker grouped by directory, enter execs `claude --resume` in the right project.
 - **Search everything**: full-text search across every session on the machine, registered or not.
 - **Carry context between sessions**: `/clauzz:context` injects a digest of one session into another.
