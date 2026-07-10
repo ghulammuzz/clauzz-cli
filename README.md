@@ -2,10 +2,10 @@
 
 ![clauzz banner](assets/banner.png)
 
-Name and resume your Claude Code sessions.
+Workspace context manager for AI coding agents.
 
-Claude Code stores sessions as anonymous UUIDs.
-`clauzz` maps them to custom names, lists them grouped by directory, and resumes them with one keypress.
+AI coding agents like Claude Code scatter your work across sessions identified only by anonymous UUIDs.
+`clauzz` turns them into a managed workspace: give sessions memorable names, list them grouped by directory, resume any of them in one keypress, and carry context from one session into another.
 
 ## Install
 
