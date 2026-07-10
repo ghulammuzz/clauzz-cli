@@ -37,7 +37,8 @@ esac
 
 # --- resolve latest version ------------------------------------------------
 info "resolving latest release of ${REPO}"
-tag="$(curl -sSL "$API_LATEST" | grep -m1 '"tag_name"' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')"
+release_json="$(curl -sSL "$API_LATEST")" || fail "could not reach GitHub API"
+tag="$(printf '%s' "$release_json" | grep -m1 '"tag_name"' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')"
 [ -n "$tag" ] || fail "could not resolve latest release (is the repo public and released?)"
 version="${tag#v}"
 
