@@ -1,0 +1,33 @@
+version: 2
+
+project_name: clauzz
+
+builds:
+  - main: .
+    binary: clauzz
+    env:
+      - CGO_ENABLED=0
+    # Windows is excluded: resume uses syscall.Exec (POSIX only).
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/ghulammuzz/clauzz-cli/cmd.version={{ .Version }}
+
+archives:
+  - name_template: "clauzz_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats:
+      - tar.gz
+    files:
+      - README.md
+      - claude-command/*
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: git
+  sort: asc

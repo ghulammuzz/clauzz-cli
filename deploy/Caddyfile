@@ -1,0 +1,5 @@
+{$DOMAIN:clauzz.muzz-ai.com} {
+	root * /srv
+	file_server
+	header /install.sh Content-Type "text/x-sh; charset=utf-8"
+}

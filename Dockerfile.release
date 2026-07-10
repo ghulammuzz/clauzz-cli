@@ -1,0 +1,13 @@
+# Serves install.sh at https://clauzz.muzz-ai.com/install.sh.
+# Caddy obtains and renews the TLS certificate automatically, so the
+# container needs ports 80 and 443 published and DNS pointing at the host.
+#
+#   docker build -f Dockerfile.release -t clauzz-install .
+#   docker run -d --name clauzz-install --restart unless-stopped \
+#     -p 80:80 -p 443:443 -v caddy_data:/data clauzz-install
+#
+# Override the domain with -e DOMAIN=other.example.com.
+FROM caddy:2-alpine
+
+COPY deploy/Caddyfile /etc/caddy/Caddyfile
+COPY install.sh /srv/install.sh

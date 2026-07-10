@@ -14,7 +14,9 @@ import (
 	"github.com/ghulammuzz/clauzz-cli/internal/tui"
 )
 
-const version = "0.1.0"
+// version is overridden at release time via
+// -ldflags "-X github.com/ghulammuzz/clauzz-cli/cmd.version=...".
+var version = "dev"
 
 var rootCmd = &cobra.Command{
 	Use:     "clauzz",

@@ -7,6 +7,17 @@ Claude Code stores sessions as anonymous UUIDs.
 
 ## Install
 
+Linux / macOS:
+
+```sh
+curl -sSL https://clauzz.muzz-ai.com/install.sh | sh
+```
+
+The script downloads the latest release binary for your platform, verifies its checksum, installs it, and installs the Claude Code slash commands.
+Windows is not supported (resume uses `exec(2)`).
+
+With Go installed:
+
 ```sh
 go install github.com/ghulammuzz/clauzz-cli@latest
 ```
@@ -50,6 +61,25 @@ $ clauzz list
 $ clauzz rm 8440
 removed "Task DB Replica" (84409ceb) in /Users/me/code/app
 ```
+
+## Release and installer hosting
+
+Releases are built by GitHub Actions + goreleaser on tag push:
+
+```sh
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+`install.sh` is served from your own server via Docker (Caddy with automatic HTTPS):
+
+```sh
+docker build -f Dockerfile.release -t clauzz-install .
+docker run -d --name clauzz-install --restart unless-stopped \
+  -p 80:80 -p 443:443 -v caddy_data:/data clauzz-install
+```
+
+Point a DNS A record for `clauzz.muzz-ai.com` at the host first; override the domain with `-e DOMAIN=...`.
+Note: the install script downloads binaries from GitHub Releases, which requires this repository to be public.
 
 ## How it works
 
