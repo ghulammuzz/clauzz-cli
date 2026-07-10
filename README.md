@@ -2,6 +2,8 @@
 
 ![clauzz banner](assets/banner.png)
 
+![clauzz demo](demo/demo.gif)
+
 Workspace context manager for AI coding agents.
 
 AI coding agents scatter your work across sessions identified only by anonymous UUIDs.

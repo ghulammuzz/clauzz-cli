@@ -86,6 +86,8 @@ func age(t time.Time) string {
 	}
 	d := time.Since(t)
 	switch {
+	case d < time.Minute: // includes future mtimes from clock skew
+		return "now"
 	case d < time.Hour:
 		return fmt.Sprintf("%dm ago", int(d.Minutes()))
 	case d < 24*time.Hour:

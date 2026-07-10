@@ -1,0 +1,3 @@
+{"type": "ai-title", "aiTitle": "Route failed orders to a Kafka DLQ", "sessionId": "3f2a8c1e-7b44-4d19-9c02-a1e5f0b83d21"}
+{"type": "user", "cwd": "/Users/demo/code/shop-api", "sessionId": "3f2a8c1e-7b44-4d19-9c02-a1e5f0b83d21", "message": {"role": "user", "content": "our kafka consumer drops failed order events, add a dead letter queue"}}
+{"type": "assistant", "cwd": "/Users/demo/code/shop-api", "sessionId": "3f2a8c1e-7b44-4d19-9c02-a1e5f0b83d21", "message": {"role": "assistant", "content": [{"type": "text", "text": "Added a DLQ topic orders.dlq with a retry policy; consumer now publishes poison messages there after 3 attempts."}]}}

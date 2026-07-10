@@ -1,0 +1,3 @@
+{"type": "ai-title", "aiTitle": "Redesign the checkout flow", "sessionId": "e15fb3c8-90a7-4b52-a3dd-72f4c6091b34"}
+{"type": "user", "cwd": "/Users/demo/code/shop-web", "sessionId": "e15fb3c8-90a7-4b52-a3dd-72f4c6091b34", "message": {"role": "user", "content": "rebuild checkout as a single page flow with optimistic UI"}}
+{"type": "assistant", "cwd": "/Users/demo/code/shop-web", "sessionId": "e15fb3c8-90a7-4b52-a3dd-72f4c6091b34", "message": {"role": "assistant", "content": [{"type": "text", "text": "Split the form into three steps with client-side validation and a summary sidebar."}]}}

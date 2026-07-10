@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "sessions": [
+    {
+      "name": "Task Kafka DLQ",
+      "sessionId": "3f2a8c1e-7b44-4d19-9c02-a1e5f0b83d21",
+      "dir": "/Users/demo/code/shop-api",
+      "addedAt": "2026-07-10T09:15:00Z"
+    },
+    {
+      "name": "Fix payment webhook",
+      "sessionId": "8b91d4f7-2c60-4e83-b7aa-40cd92e17f55",
+      "dir": "/Users/demo/code/shop-api",
+      "addedAt": "2026-07-09T14:00:00Z"
+    },
+    {
+      "name": "DB replica lag",
+      "sessionId": "c47e02a9-5d18-47f2-8e36-91b0aa64d8e0",
+      "dir": "/Users/demo/code/shop-api",
+      "addedAt": "2026-07-08T11:30:00Z"
+    },
+    {
+      "name": "Checkout revamp",
+      "sessionId": "e15fb3c8-90a7-4b52-a3dd-72f4c6091b34",
+      "dir": "/Users/demo/code/shop-web",
+      "addedAt": "2026-07-10T16:45:00Z"
+    },
+    {
+      "name": "Fix CSS navbar",
+      "sessionId": "a92d6e40-1f8b-4c77-95c1-38e7b52da9f6",
+      "dir": "/Users/demo/code/shop-web",
+      "addedAt": "2026-07-07T10:00:00Z"
+    }
+  ]
+}

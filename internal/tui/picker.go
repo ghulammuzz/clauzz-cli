@@ -173,7 +173,7 @@ func rowAge(it item) string {
 // humanAge formats a duration as a compact "2h ago" style string.
 func humanAge(d time.Duration) string {
 	switch {
-	case d < time.Minute:
+	case d < time.Minute: // includes future mtimes from clock skew
 		return "now"
 	case d < time.Hour:
 		return fmt.Sprintf("%dm ago", int(d.Minutes()))
