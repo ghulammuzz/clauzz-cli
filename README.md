@@ -2,14 +2,27 @@
 
 ![clauzz banner](assets/banner.png)
 
-![clauzz demo](demo/demo.gif)
+[![Release](https://img.shields.io/github/v/release/ghulammuzz/clauzz-cli)](https://github.com/ghulammuzz/clauzz-cli/releases/latest)
+[![CI](https://github.com/ghulammuzz/clauzz-cli/actions/workflows/release.yml/badge.svg)](https://github.com/ghulammuzz/clauzz-cli/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ghulammuzz/clauzz-cli)](https://goreportcard.com/report/github.com/ghulammuzz/clauzz-cli)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Workspace context manager for AI coding agents.
+**Workspace context manager for AI coding agents.**
 
 AI coding agents scatter your work across sessions identified only by anonymous UUIDs.
-`clauzz` turns them into a managed workspace: give sessions memorable names, list them grouped by directory, search across all of them, resume any of them in one keypress, and carry context from one session into another.
+`clauzz` turns them into a managed workspace.
 
 Today clauzz supports Claude Code; adapters for other agents are on the roadmap.
+
+![clauzz demo](demo/demo.gif)
+
+## Features
+
+- **Name your sessions**: `evoucher close-loop` instead of `70c79231-...`.
+- **Resume in one keypress**: a TUI picker grouped by directory, enter execs `claude --resume` in the right project.
+- **Search everything**: full-text search across every session on the machine, registered or not.
+- **Carry context between sessions**: `/clauzz:context` injects a digest of one session into another.
+- **Slash commands inside Claude Code**: register, list, and pull context without leaving your session.
 
 ## Install
 
@@ -22,61 +35,66 @@ curl -sSL https://clauzz.muzz-ai.com/install.sh | sh
 The script downloads the latest release binary for your platform, verifies its checksum, installs it, and installs the Claude Code slash commands.
 Windows is not supported (resume uses `exec(2)`).
 
+<details>
+<summary>Other install methods</summary>
+
 With Go installed:
 
 ```sh
 go install github.com/ghulammuzz/clauzz-cli/cmd/clauzz@latest
 ```
 
-Or build from source:
+Build from source:
 
 ```sh
 go build -o clauzz ./cmd/clauzz && mv clauzz /usr/local/bin/
 ```
 
-### Uninstall
-
-```sh
-curl -sSL https://clauzz.muzz-ai.com/uninstall.sh | sh
-```
-
-Removes the binary and the slash commands.
-The session registry at `~/.clauzz` is kept; add `| sh -s -- --purge` to remove it too.
-
-### Slash command (optional)
-
-To use `/clauzz:add-session {name}`, `/clauzz:context {id-prefix}`, and `/clauzz:list` from inside Claude Code:
+Slash commands only (if you skipped the install script):
 
 ```sh
 mkdir -p ~/.claude/commands/clauzz && cp claude-command/*.md ~/.claude/commands/clauzz/
 ```
 
+</details>
+
 ## Usage
+
+### CLI
 
 | Command | What it does |
 |---------|--------------|
-| `clauzz` | Interactive picker. Enter resumes the session via `claude --resume` in its directory |
+| `clauzz` | Interactive picker; enter resumes the session via `claude --resume` in its directory |
 | `clauzz add {name}` | Register the current Claude session under a custom name |
-| `clauzz list` | Plain list of registered sessions, grouped by directory; `ls` is an alias |
-| `clauzz prune` | Remove all `[gone]` entries (sessions whose transcript was deleted) |
-| `clauzz search {query}` | Full-text search across every session on the machine, registered or not |
+| `clauzz list` | List registered sessions grouped by directory (`ls` works too) |
+| `clauzz search {query}` | Full-text search across every session on the machine |
+| `clauzz context {id-prefix} [focus...]` | Print the context digest of a session (powers `/clauzz:context`) |
 | `clauzz rename {id-prefix} {new-name}` | Rename a registered session |
-| `clauzz context {id-prefix}` | Print a context digest of a session (used by `/clauzz:context`) |
-| `clauzz rm {id-prefix}` | Remove a session from the registry (min 4 chars of the session ID); `delete` is an alias |
-| `clauzz --help` | Show help |
+| `clauzz rm {id-prefix}` | Remove a session from the registry (`delete` works too) |
+| `clauzz prune` | Drop all `[gone]` entries whose transcript was deleted |
+
+Session ID prefixes need at least 4 characters.
+
+### Slash commands (inside Claude Code)
+
+| Command | What it does |
+|---------|--------------|
+| `/clauzz:add-session {name}` | Register the current session under a custom name |
+| `/clauzz:list` | Show registered sessions |
+| `/clauzz:context {id-prefix} [focus query]` | Load another session's context into this one |
 
 Example:
 
 ```
-$ clauzz list
-/Users/me/code/app
-  Task Kafka                     625e4b2e   2026-07-09 10:12
-  Task DB Replica                84409ceb   2026-07-08 21:30
-/Users/me/code/app/membership
-  Feat Membership List           bdd3bcef   2026-07-09 09:01
+$ clauzz ls
+/Users/demo/code/shop-api
+  Task Kafka DLQ                 3f2a8c1e   2026-07-10 16:15
+  Fix payment webhook            8b91d4f7   2026-07-09 21:00
+/Users/demo/code/shop-web
+  Checkout revamp                e15fb3c8   2026-07-10 23:45
 
-$ clauzz rm 8440
-removed "Task DB Replica" (84409ceb) in /Users/me/code/app
+$ clauzz rm 8b91
+removed "Fix payment webhook" (8b91d4f7) in /Users/demo/code/shop-api
 ```
 
 ## Demos
@@ -96,11 +114,11 @@ The GIF shows the digest that gets injected: title, user prompts, last messages,
 
 ## How it works
 
-- Registry lives at `~/.clauzz/sessions.json`.
-- `add` resolves the current session from `$CLAUDE_SESSION_ID`, falling back to the newest session transcript in `~/.claude/projects/{encoded-cwd}/`.
-- Entries whose transcript was deleted show `[gone]` and cannot be resumed; remove them with `clauzz rm`.
-- Removing an entry never touches the Claude session itself.
-- `/clauzz:context {id-prefix} [focus query]` injects a digest of another session into the active one: its title, every user prompt, and the last 20 messages (truncated). With a focus query (e.g. `/clauzz:context 948e consumer group setup`), Claude also greps the source transcript for that topic and loads only the relevant parts. Without one, it falls back to the transcript only when the digest is not enough.
+- The registry is a single JSON file at `~/.clauzz/sessions.json`; removing an entry never touches the Claude session itself.
+- `add` resolves the current session from `$CLAUDE_SESSION_ID`, falling back to the newest transcript in `~/.claude/projects/{encoded-cwd}/`.
+- Entries whose transcript was deleted show `[gone]` and cannot be resumed; clean them up with `clauzz rm` or `clauzz prune`.
+- The context digest carries the source session's title, every user prompt, and the last 20 messages (truncated).
+  With a focus query, Claude also greps the source transcript for that topic and loads only the relevant parts.
 
 ### Context transfer flow
 
@@ -129,3 +147,16 @@ sequenceDiagram
 
     A-->>User: summary of loaded context,<br/>ready to work with it
 ```
+
+## Uninstall
+
+```sh
+curl -sSL https://clauzz.muzz-ai.com/uninstall.sh | sh
+```
+
+Removes the binary and the slash commands.
+The session registry at `~/.clauzz` is kept; add `| sh -s -- --purge` to remove it too.
+
+## License
+
+[MIT](LICENSE)
