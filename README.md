@@ -77,4 +77,32 @@ removed "Task DB Replica" (84409ceb) in /Users/me/code/app
 - `add` resolves the current session from `$CLAUDE_SESSION_ID`, falling back to the newest session transcript in `~/.claude/projects/{encoded-cwd}/`.
 - Entries whose transcript was deleted show `[gone]` and cannot be resumed; remove them with `clauzz rm`.
 - Removing an entry never touches the Claude session itself.
-- `/clauzz:context {id-prefix}` injects a digest of another session into the active one: its title, every user prompt, and the last 20 messages (truncated). If that is not enough, Claude follows the transcript path in the digest and reads only the parts it needs.
+- `/clauzz:context {id-prefix} [focus query]` injects a digest of another session into the active one: its title, every user prompt, and the last 20 messages (truncated). With a focus query (e.g. `/clauzz:context 948e consumer group setup`), Claude also greps the source transcript for that topic and loads only the relevant parts. Without one, it falls back to the transcript only when the digest is not enough.
+
+### Context transfer flow
+
+How `/clauzz:context` moves context from session B into the active session A:
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant A as Claude session A
+    participant CLI as clauzz CLI
+    participant Reg as ~/.clauzz/sessions.json
+    participant B as Session B transcript (jsonl)
+
+    User->>A: /clauzz:context {id-prefix-B}
+    A->>CLI: clauzz context {id-prefix-B}
+    CLI->>Reg: resolve prefix to session B entry
+    CLI->>B: parse transcript
+    Note over CLI,B: keep user prompts + assistant text,<br/>drop tool calls, results, thinking, sidechains
+    CLI-->>A: digest (title, all user prompts,<br/>last 20 messages, transcript path)
+    Note over A: digest becomes part of<br/>session A's context
+
+    opt focus query given, or digest not enough
+        A->>B: Read/Grep specific parts of the transcript
+        B-->>A: only the details needed
+    end
+
+    A-->>User: summary of loaded context,<br/>ready to work with it
+```
