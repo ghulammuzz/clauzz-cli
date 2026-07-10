@@ -99,6 +99,17 @@ removed "Fix payment webhook" (8b91d4f7) in /Users/demo/code/shop-api
 
 ## Demos
 
+### Register a session from Claude Code
+
+1. Open your project and start a session: `claude` (or resume an old one).
+2. Type `/clauzz:add-session {name}`, e.g. `/clauzz:add-session Demo Session`.
+3. Claude confirms the registration: `Session "Demo Session" registered -> 84409ceb in ...`.
+4. From then on the session shows up in `clauzz ls` and the `clauzz` picker under that name.
+
+Re-running `/clauzz:add-session` in the same session just renames it (the registration is an upsert).
+
+![clauzz add-session demo](demo/add-session.gif)
+
 ### Search across every session
 
 Which session talked about kafka? `clauzz search` answers from every transcript on the machine, registered in clauzz or not.
