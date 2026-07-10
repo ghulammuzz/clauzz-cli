@@ -1,10 +1,14 @@
-# clauzz context demo: the digest /clauzz:context injects into a session.
+# clauzz context demo: pull another session's context from inside Claude Code.
 # Render from the repository root with:  vhs demo/context.tape
-# Runs against the synthetic fixture in demo/fixture (see demo/README.md).
+#
+# Launches the real Claude Code TUI (requires `claude` installed and logged
+# in). CLAUZZ_HOME and CLAUZZ_CLAUDE_DIR point at the synthetic fixture, so
+# the digest shows generic demo sessions only.
 
 Output demo/context.gif
 
 Require clauzz
+Require claude
 
 Set Shell "bash"
 Set FontSize 15
@@ -23,14 +27,13 @@ Type "clear"
 Enter
 Show
 
-# --- pick the source session -------------------------------------------------
-Type "clauzz ls"
+# --- open Claude Code in the project ----------------------------------------
+Type "claude"
 Enter
-Sleep 2.5s
+Sleep 10s
 
-# --- digest of another session, with a focus query ---------------------------
-# Inside Claude Code the same thing is one slash command:
-#   /clauzz:context 3f2a8c1e dlq retry policy
-Type "clauzz context 3f2a8c1e dlq retry policy"
+# --- load another session's context, focused on a topic ----------------------
+Type "/clauzz:context 3f2a8c1e what was decided about the dlq retry policy"
+Sleep 2s
 Enter
-Sleep 6s
+Sleep 55s

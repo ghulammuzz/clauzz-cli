@@ -9,20 +9,25 @@
 
 **Workspace context manager for AI coding agents.**
 
-AI coding agents scatter your work across sessions identified only by anonymous UUIDs.
-`clauzz` turns them into a managed workspace.
+## Why
 
-Today clauzz supports Claude Code; adapters for other agents are on the roadmap.
+clauzz was born from a very normal week at work: a bunch of microservices, and a separate Claude Code session for each fire.
+One session chasing a Kafka DLQ, one debugging a payment webhook that double-charges, one staring at replica lag.
 
-![clauzz demo](demo/demo.gif)
+Then Monday comes, you run `claude -r`, and it's a wall of UUIDs.
+Which one was the webhook fix? No idea. You open three wrong sessions before you find it.
 
-## Features
+clauzz fixes that loop:
 
 - **Name your sessions**: `Task Kafka DLQ` instead of `3f2a8c1e-...`.
-- **Resume in one keypress**: a TUI picker grouped by directory, enter execs `claude --resume` in the right project.
-- **Search everything**: full-text search across every session on the machine, registered or not.
-- **Carry context between sessions**: `/clauzz:context` injects a digest of one session into another.
-- **Slash commands inside Claude Code**: register, list, and pull context without leaving your session.
+- **Resume in one keypress**: a picker grouped by directory; enter drops you back in via `claude --resume`, in the right project.
+- **Search everything**: "which session talked about idempotency keys?" answered from every transcript on your machine.
+- **Move context between sessions**: the DLQ session knows things your new session needs? `/clauzz:context` hands them over.
+- **All without leaving Claude Code**: register, list, and pull context via slash commands.
+
+Claude Code today; adapters for other agents are on the roadmap.
+
+![clauzz demo](demo/demo.gif)
 
 ## Install
 
@@ -32,7 +37,7 @@ Linux / macOS:
 curl -sSL https://clauzz.muzz-ai.com/install.sh | sh
 ```
 
-The script downloads the latest release binary for your platform, verifies its checksum, installs it, and installs the Claude Code slash commands.
+The script grabs the latest release for your platform, checks the sha256, installs the binary, and drops in the Claude Code slash commands.
 Windows is not supported (resume uses `exec(2)`).
 
 <details>
@@ -101,25 +106,26 @@ removed "Fix payment webhook" (8b91d4f7) in /Users/demo/code/shop-api
 
 ### Register a session from Claude Code
 
-1. Open your project and start a session: `claude` (or resume an old one).
-2. Type `/clauzz:add-session {name}`, e.g. `/clauzz:add-session Demo Session`.
-3. Claude confirms the registration: `Session "Demo Session" registered -> 84409ceb in ...`.
-4. From then on the session shows up in `clauzz ls` and the `clauzz` picker under that name.
+Working on something worth coming back to? Name it before you forget:
 
-Re-running `/clauzz:add-session` in the same session just renames it (the registration is an upsert).
+1. In your session, type `/clauzz:add-session {name}`, e.g. `/clauzz:add-session Demo Session`.
+2. Claude confirms: `Session "Demo Session" registered -> 84409ceb in ...`.
+3. From now on it shows up in `clauzz ls` and the picker under that name.
+
+Re-running `/clauzz:add-session` in the same session just renames it.
 
 ![clauzz add-session demo](demo/add-session.gif)
 
 ### Search across every session
 
-Which session talked about kafka? `clauzz search` answers from every transcript on the machine, registered in clauzz or not.
+"Which session talked about kafka?" `clauzz search` answers from every transcript on the machine, registered in clauzz or not.
 
 ![clauzz search demo](demo/search.gif)
 
-### Carry context between sessions
+### Pull context from another session
 
-Inside Claude Code, `/clauzz:context {id-prefix} [focus query]` injects a digest of another session into the active one.
-The GIF shows the digest that gets injected: title, user prompts, last messages, and the focus query for Claude to dig into.
+You are in a fresh session, but the decisions you need live in last week's DLQ session.
+Type `/clauzz:context {id-prefix} [what you want from it]` and Claude loads a digest of that session, greps its transcript for your focus topic, and reports back:
 
 ![clauzz context demo](demo/context.gif)
 
@@ -166,7 +172,7 @@ curl -sSL https://clauzz.muzz-ai.com/uninstall.sh | sh
 ```
 
 Removes the binary and the slash commands.
-The session registry at `~/.clauzz` is kept; add `| sh -s -- --purge` to remove it too.
+Your session registry at `~/.clauzz` survives; add `| sh -s -- --purge` if you want it gone too.
 
 ## License
 
