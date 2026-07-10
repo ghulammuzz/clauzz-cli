@@ -80,6 +80,19 @@ func TestDigest(t *testing.T) {
 	if strings.Contains(got, "partition rebalance") {
 		t.Error("lastN=2 must exclude older messages from the tail section")
 	}
+	if strings.Contains(got, "Focus query:") {
+		t.Error("no focus line expected when Meta.Focus is empty")
+	}
+}
+
+func TestDigestFocus(t *testing.T) {
+	tr := parseSample(t)
+	meta := Meta{Name: "Task Kafka", SessionID: "abcdefgh-1234", Dir: "/app", Path: "/x/abc.jsonl", Focus: "consumer group setup"}
+
+	got := Digest(tr, meta, 2, 500)
+	if !strings.Contains(got, "Focus query: consumer group setup") {
+		t.Errorf("digest missing focus line\n---\n%s", got)
+	}
 }
 
 func TestTruncate(t *testing.T) {

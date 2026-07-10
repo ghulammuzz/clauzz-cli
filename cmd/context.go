@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -16,17 +17,19 @@ var (
 )
 
 var contextCmd = &cobra.Command{
-	Use:   "context {session-id-prefix}",
+	Use:   "context {session-id-prefix} [focus query...]",
 	Short: "Print a context digest of a registered session",
 	Long: "Prints a compact digest of another session's conversation: title, all\n" +
 		"user prompts, and the last messages. Meant to be injected into an active\n" +
-		"Claude session via the /clauzz:context slash command.",
-	Args: cobra.MaximumNArgs(1),
+		"Claude session via the /clauzz:context slash command. Words after the\n" +
+		"prefix are echoed as a focus query for the receiving Claude to pursue.",
+	Args: cobra.ArbitraryArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
+		if len(args) == 0 {
 			return cmd.Help()
 		}
 		prefix := args[0]
+		focus := strings.TrimSpace(strings.Join(args[1:], " "))
 		if len(prefix) < 4 {
 			return fmt.Errorf("prefix %q too short, use at least 4 characters", prefix)
 		}
@@ -54,6 +57,7 @@ var contextCmd = &cobra.Command{
 			SessionID: entry.SessionID,
 			Dir:       entry.Dir,
 			Path:      path,
+			Focus:     focus,
 		}
 		fmt.Print(transcript.Digest(t, meta, contextLast, contextMaxChars))
 		return nil

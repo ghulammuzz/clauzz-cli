@@ -26,12 +26,14 @@ type Transcript struct {
 	Messages []Message
 }
 
-// Meta identifies the source session in the rendered digest.
+// Meta identifies the source session in the rendered digest. Focus is an
+// optional topic the receiving Claude should dig into beyond the digest.
 type Meta struct {
 	Name      string
 	SessionID string
 	Dir       string
 	Path      string
+	Focus     string
 }
 
 type contentBlock struct {
@@ -160,6 +162,9 @@ func Digest(t *Transcript, meta Meta, lastN, maxChars int) string {
 	}
 	fmt.Fprintf(&b, "Directory: %s\n", meta.Dir)
 	fmt.Fprintf(&b, "Full transcript (jsonl, for Read/Grep when this digest is not enough): %s\n", meta.Path)
+	if meta.Focus != "" {
+		fmt.Fprintf(&b, "Focus query: %s\n", meta.Focus)
+	}
 
 	prompts := t.UserPrompts()
 	fmt.Fprintf(&b, "\n## All user prompts (%d, in order)\n", len(prompts))
