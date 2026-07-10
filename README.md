@@ -1,5 +1,7 @@
 # clauzz
 
+![clauzz banner](assets/banner.png)
+
 Name and resume your Claude Code sessions.
 
 Claude Code stores sessions as anonymous UUIDs.
