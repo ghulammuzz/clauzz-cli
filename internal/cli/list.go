@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ghulammuzz/clauzz-cli/internal/archive"
 	"github.com/ghulammuzz/clauzz-cli/internal/claudedir"
 	"github.com/ghulammuzz/clauzz-cli/internal/store"
 )
@@ -30,7 +31,11 @@ var listCmd = &cobra.Command{
 				line := fmt.Sprintf("  %-30s %-10s %s",
 					e.Name, store.ShortID(e.SessionID), e.AddedAt.Local().Format("2006-01-02 15:04"))
 				if !claudedir.SessionExists(e.Dir, e.SessionID) {
-					line += "  [gone]"
+					if archive.Exists(e.SessionID) {
+						line += "  [archived]"
+					} else {
+						line += "  [gone]"
+					}
 				}
 				fmt.Println(line)
 			}

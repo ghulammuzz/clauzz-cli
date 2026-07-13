@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ghulammuzz/clauzz-cli/internal/archive"
 	"github.com/ghulammuzz/clauzz-cli/internal/claudedir"
 	"github.com/ghulammuzz/clauzz-cli/internal/store"
 	"github.com/ghulammuzz/clauzz-cli/internal/transcript"
@@ -22,7 +23,8 @@ var contextCmd = &cobra.Command{
 	Long: "Prints a compact digest of another session's conversation: title, all\n" +
 		"user prompts, and the last messages. Meant to be injected into an active\n" +
 		"Claude session via the /clauzz:context slash command. Words after the\n" +
-		"prefix are echoed as a focus query for the receiving Claude to pursue.",
+		"prefix are echoed as a focus query for the receiving Claude to pursue.\n" +
+		"When the live transcript is gone, the digest is served from the archive.",
 	Args: cobra.ArbitraryArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
@@ -42,26 +44,49 @@ var contextCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		return printDigest(entry, focus)
+	},
+}
 
-		path, err := claudedir.SessionFile(entry.Dir, entry.SessionID)
+// printDigest renders one session's context digest, preferring the live
+// transcript and falling back to the archive snapshot.
+func printDigest(entry store.Entry, focus string) error {
+	var (
+		t    *transcript.Transcript
+		path string
+		err  error
+	)
+	if claudedir.SessionExists(entry.Dir, entry.SessionID) {
+		path, err = claudedir.SessionFile(entry.Dir, entry.SessionID)
 		if err != nil {
 			return err
 		}
-		t, err := transcript.ParseFile(path)
+		t, err = transcript.ParseFile(path)
 		if err != nil {
 			return fmt.Errorf("read transcript of %q: %w", entry.Name, err)
 		}
-
-		meta := transcript.Meta{
-			Name:      entry.Name,
-			SessionID: entry.SessionID,
-			Dir:       entry.Dir,
-			Path:      path,
-			Focus:     focus,
+	} else {
+		a, aerr := archive.LoadIfExists(entry.SessionID)
+		if aerr != nil {
+			return fmt.Errorf("transcript of %q is gone and it has no archive (run `clauzz archive` while sessions are alive)", entry.Name)
 		}
-		fmt.Print(transcript.Digest(t, meta, contextLast, contextMaxChars))
-		return nil
-	},
+		t = a.Transcript()
+		path, err = archive.Path(entry.SessionID)
+		if err != nil {
+			return err
+		}
+		fmt.Println("note: live transcript is gone, serving from the archive snapshot")
+	}
+
+	meta := transcript.Meta{
+		Name:      entry.Name,
+		SessionID: entry.SessionID,
+		Dir:       entry.Dir,
+		Path:      path,
+		Focus:     focus,
+	}
+	fmt.Print(transcript.Digest(t, meta, contextLast, contextMaxChars))
+	return nil
 }
 
 func init() {

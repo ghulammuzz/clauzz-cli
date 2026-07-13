@@ -13,7 +13,7 @@ func TestFuzzyMatch(t *testing.T) {
 	}{
 		{"", "anything", true},
 		{"kafka", "Task Kafka DLQ", true},
-		{"KDLQ", "Task Kafka DLQ", true},  // subsequence, case-insensitive
+		{"KDLQ", "Task Kafka DLQ", true},   // subsequence, case-insensitive
 		{"ka dlq", "Task Kafka DLQ", true}, // space matches the word gap
 		{"webhook", "Task Kafka DLQ", false},
 		{"qld", "Task Kafka DLQ", false}, // order matters

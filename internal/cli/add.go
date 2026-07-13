@@ -44,17 +44,23 @@ var addCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		reg.Add(store.Entry{
+		entry := store.Entry{
 			Name:      name,
 			SessionID: sessionID,
 			Dir:       cwd,
 			AddedAt:   time.Now().UTC(),
-		})
+		}
+		reg.Add(entry)
 		if err := reg.Save(); err != nil {
 			return err
 		}
 
 		fmt.Printf("registered %q -> %s in %s\n", name, store.ShortID(sessionID), cwd)
+		// Best effort: snapshot right away so the context survives transcript
+		// cleanup even if the user never runs `clauzz archive`.
+		if err := archiveEntry(entry); err != nil {
+			fmt.Printf("warning: could not archive session: %v\n", err)
+		}
 		return nil
 	},
 }

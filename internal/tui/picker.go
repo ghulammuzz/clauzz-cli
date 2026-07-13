@@ -12,6 +12,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/ghulammuzz/clauzz-cli/internal/archive"
 	"github.com/ghulammuzz/clauzz-cli/internal/claudedir"
 	"github.com/ghulammuzz/clauzz-cli/internal/store"
 )
@@ -35,6 +36,7 @@ type item struct {
 	entry      store.Entry
 	discovered bool
 	stale      bool
+	archived   bool // stale but with an archive snapshot
 	modified   time.Time
 	hasMtime   bool
 }
@@ -124,9 +126,11 @@ func (m *model) rebuild() {
 		items = append(items, item{isHeader: true, dir: g.Dir})
 		for _, e := range g.Entries {
 			mtime, ok := claudedir.LastModified(e.Dir, e.SessionID)
+			stale := !claudedir.SessionExists(e.Dir, e.SessionID)
 			items = append(items, item{
 				entry:    e,
-				stale:    !claudedir.SessionExists(e.Dir, e.SessionID),
+				stale:    stale,
+				archived: stale && archive.Exists(e.SessionID),
 				modified: mtime,
 				hasMtime: ok,
 			})
@@ -271,8 +275,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		if it.stale {
-			m.status = fmt.Sprintf("session %s is gone, remove it with: clauzz rm %s",
-				store.ShortID(it.entry.SessionID), store.ShortID(it.entry.SessionID))
+			id := store.ShortID(it.entry.SessionID)
+			if it.archived {
+				m.status = fmt.Sprintf("session %s cannot be resumed, but its context lives on: clauzz context %s", id, id)
+			} else {
+				m.status = fmt.Sprintf("session %s is gone, remove it with: clauzz rm %s", id, id)
+			}
 			return m, nil
 		}
 		m.result = Result{Entry: it.entry, Chosen: true, Discovered: it.discovered}
@@ -336,10 +344,15 @@ func (m model) renderRow(i int, it item) string {
 		line += "  " + newStyle.Render("[new]")
 	}
 
+	label := "  [gone]"
+	if it.archived {
+		label = "  [archived]"
+	}
+
 	prefix := "    "
 	switch {
 	case it.stale:
-		line = dimStyle.Render(line + "  [gone]")
+		line = dimStyle.Render(line + label)
 	case i == m.cursor:
 		prefix = "  " + cursorStyle.Render("> ")
 		line = cursorStyle.Render(line)

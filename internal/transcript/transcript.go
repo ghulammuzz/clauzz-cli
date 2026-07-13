@@ -16,8 +16,8 @@ import (
 
 // Message is one kept conversation turn.
 type Message struct {
-	Role string // "user" or "assistant"
-	Text string
+	Role string `json:"role"` // "user" or "assistant"
+	Text string `json:"text"`
 }
 
 // Transcript is the filtered content of one session.

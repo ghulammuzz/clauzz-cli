@@ -85,7 +85,8 @@ That is the whole loop. Once sessions pile up, `clauzz search {query}` finds the
 | `clauzz context {id-prefix} [focus...]` | Print the context digest of a session (powers `/clauzz:context`) |
 | `clauzz rename {id-prefix} {new-name}` | Rename a registered session |
 | `clauzz rm {id-prefix}` | Remove a session from the registry (`delete` works too) |
-| `clauzz prune` | Drop all `[gone]` entries whose transcript was deleted |
+| `clauzz archive` | Snapshot all registered sessions so their context survives Claude's transcript cleanup |
+| `clauzz prune` | Drop `[gone]` entries; archived ones are kept unless `--all` |
 
 Session ID prefixes need at least 4 characters.
 
@@ -135,7 +136,8 @@ Type `/clauzz:context {id-prefix} [what you want from it]` and Claude loads a di
 
 - The registry is a single JSON file at `~/.clauzz/sessions.json`; removing an entry never touches the Claude session itself.
 - `add` resolves the current session from `$CLAUDE_SESSION_ID`, falling back to the newest transcript in `~/.claude/projects/{encoded-cwd}/`.
-- Entries whose transcript was deleted show `[gone]` and cannot be resumed; clean them up with `clauzz rm` or `clauzz prune`.
+- Claude Code eventually deletes old transcripts. `clauzz add` snapshots the conversation to `~/.clauzz/archive` (refresh anytime with `clauzz archive`), so `clauzz context` keeps working after cleanup; such entries show `[archived]`.
+- Entries whose transcript was deleted without an archive show `[gone]` and cannot be resumed; clean them up with `clauzz rm` or `clauzz prune`.
 - The context digest carries the source session's title, every user prompt, and the last 20 messages (truncated).
   With a focus query, Claude also greps the source transcript for that topic and loads only the relevant parts.
 
