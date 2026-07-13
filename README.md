@@ -21,7 +21,7 @@ clauzz fixes that loop:
 
 - **Name your sessions**: `Task Kafka DLQ` instead of `3f2a8c1e-...` ([demo](#register-a-session-from-claude-code)).
 - **Discover old sessions**: press `a` in the picker to see unregistered sessions with their AI titles; pick one and it is registered and resumed in one go.
-- **Resume in one keypress**: a picker grouped by directory; enter drops you back in via `claude --resume`, in the right project.
+- **Resume in one keypress**: a picker grouped by directory; enter drops you back in via `claude --resume`, in the right project ([demo](#pick-a-session-with-clauzz)).
 - **Search everything**: "which session talked about idempotency keys?" answered from every transcript on your machine ([demo](#search-across-every-session)).
 - **Move context between sessions**: the DLQ session knows things your new session needs? `/clauzz:context` hands them over ([demo](#pull-context-from-another-session)).
 - **All without leaving Claude Code**: register, list, and pull context via slash commands.
@@ -64,12 +64,13 @@ mkdir -p ~/.claude/commands/clauzz && cp claude-command/*.md ~/.claude/commands/
 ## Quick start
 
 ```sh
-cd your-project && claude          # 1. work as usual
-/clauzz:add-session Payment Fix    # 2. name the session before you leave
-clauzz                             # 3. next day: pick it, hit enter, keep going
+cd your-project && claude                  # 1. work as usual
+/clauzz:add-session Payment Fix            # 2. name the session before you leave
+clauzz                                     # 3. next day: pick it, hit enter, keep going
+/clauzz:context 8b91 retry decisions       # 4. new session needs what the old one knows? pull it in
 ```
 
-That is the whole loop. `clauzz search {query}` and `/clauzz:context {id} [focus]` join in once you have a few sessions.
+That is the whole loop. Once sessions pile up, `clauzz search {query}` finds the one you forgot to name.
 
 ## Usage
 
@@ -110,11 +111,12 @@ Re-running `/clauzz:add-session` in the same session just renames it.
 
 ![clauzz add-session demo](demo/add-session.gif)
 
-### Search across every session
+### Pick a session with `clauzz`
 
-"Which session talked about kafka?" `clauzz search` answers from every transcript on the machine, registered in clauzz or not.
+Run `clauzz`, arrow or `j/k` to the session you want, hit enter, and you are back in it - in the right directory.
+`/` fuzzy-filters the list; `a` reveals unregistered sessions to adopt.
 
-![clauzz search demo](demo/search.gif)
+![clauzz picker demo](demo/demo.gif)
 
 ### Pull context from another session
 
@@ -122,6 +124,12 @@ You are in a fresh session, but the decisions you need live in last week's DLQ s
 Type `/clauzz:context {id-prefix} [what you want from it]` and Claude loads a digest of that session, greps its transcript for your focus topic, and reports back:
 
 ![clauzz context demo](demo/context.gif)
+
+### Search across every session
+
+"Which session talked about kafka?" `clauzz search` answers from every transcript on the machine, registered in clauzz or not.
+
+![clauzz search demo](demo/search.gif)
 
 ## How it works
 
