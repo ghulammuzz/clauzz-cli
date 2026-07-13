@@ -9,6 +9,8 @@
 
 **Workspace context manager for AI coding agents.**
 
+![clauzz demo](demo/demo.gif)
+
 ## Why
 
 clauzz was born from a very normal week at work: a bunch of microservices, and a separate Claude Code session for each fire.
@@ -19,26 +21,23 @@ Which one was the webhook fix? No idea. You open three wrong sessions before you
 
 clauzz fixes that loop:
 
-- **Name your sessions**: `Task Kafka DLQ` instead of `3f2a8c1e-...`.
+- **Name your sessions**: `Task Kafka DLQ` instead of `3f2a8c1e-...` ([demo](#register-a-session-from-claude-code)).
 - **Resume in one keypress**: a picker grouped by directory; enter drops you back in via `claude --resume`, in the right project.
-- **Search everything**: "which session talked about idempotency keys?" answered from every transcript on your machine.
-- **Move context between sessions**: the DLQ session knows things your new session needs? `/clauzz:context` hands them over.
+- **Search everything**: "which session talked about idempotency keys?" answered from every transcript on your machine ([demo](#search-across-every-session)).
+- **Move context between sessions**: the DLQ session knows things your new session needs? `/clauzz:context` hands them over ([demo](#pull-context-from-another-session)).
 - **All without leaving Claude Code**: register, list, and pull context via slash commands.
 
 Claude Code today; adapters for other agents are on the roadmap.
 
-![clauzz demo](demo/demo.gif)
-
 ## Install
 
-Linux / macOS:
+Requires [Claude Code](https://claude.com/claude-code) installed and logged in. Linux and macOS only (resume uses `exec(2)`).
 
 ```sh
 curl -sSL https://clauzz.muzz-ai.com/install.sh | sh
 ```
 
 The script grabs the latest release for your platform, checks the sha256, installs the binary, and drops in the Claude Code slash commands.
-Windows is not supported (resume uses `exec(2)`).
 
 <details>
 <summary>Other install methods</summary>
@@ -62,6 +61,16 @@ mkdir -p ~/.claude/commands/clauzz && cp claude-command/*.md ~/.claude/commands/
 ```
 
 </details>
+
+## Quick start
+
+```sh
+cd your-project && claude          # 1. work as usual
+/clauzz:add-session Payment Fix    # 2. name the session before you leave
+clauzz                             # 3. next day: pick it, hit enter, keep going
+```
+
+That is the whole loop. `clauzz search {query}` and `/clauzz:context {id} [focus]` join in once you have a few sessions.
 
 ## Usage
 
@@ -87,20 +96,6 @@ Session ID prefixes need at least 4 characters.
 | `/clauzz:add-session {name}` | Register the current session under a custom name |
 | `/clauzz:list` | Show registered sessions |
 | `/clauzz:context {id-prefix} [focus query]` | Load another session's context into this one |
-
-Example:
-
-```
-$ clauzz ls
-/Users/demo/code/shop-api
-  Task Kafka DLQ                 3f2a8c1e   2026-07-10 16:15
-  Fix payment webhook            8b91d4f7   2026-07-09 21:00
-/Users/demo/code/shop-web
-  Checkout revamp                e15fb3c8   2026-07-10 23:45
-
-$ clauzz rm 8b91
-removed "Fix payment webhook" (8b91d4f7) in /Users/demo/code/shop-api
-```
 
 ## Demos
 
