@@ -19,7 +19,7 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		if len(reg.Sessions) == 0 {
+		if len(reg.Sessions) == 0 && !listAll {
 			fmt.Println("no sessions registered")
 			return nil
 		}
@@ -35,10 +35,33 @@ var listCmd = &cobra.Command{
 				fmt.Println(line)
 			}
 		}
+
+		if !listAll {
+			return nil
+		}
+		exclude := make(map[string]bool, len(reg.Sessions))
+		for _, e := range reg.Sessions {
+			exclude[e.SessionID] = true
+		}
+		found, err := claudedir.Discover(exclude, 20)
+		if err != nil {
+			return err
+		}
+		if len(found) == 0 {
+			fmt.Println("\nno unregistered sessions found")
+			return nil
+		}
+		fmt.Printf("\nunregistered (most recent %d):\n", len(found))
+		for _, d := range found {
+			fmt.Printf("  %-30s %-10s %s\n", store.TruncateName(d.DisplayName(), 30), store.ShortID(d.SessionID), d.Cwd)
+		}
 		return nil
 	},
 }
 
+var listAll bool
+
 func init() {
+	listCmd.Flags().BoolVar(&listAll, "all", false, "also show unregistered sessions")
 	rootCmd.AddCommand(listCmd)
 }

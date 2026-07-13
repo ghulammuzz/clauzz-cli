@@ -9,9 +9,11 @@ import (
 	"os/exec"
 	"runtime/debug"
 	"syscall"
+	"time"
 
 	"github.com/spf13/cobra"
 
+	"github.com/ghulammuzz/clauzz-cli/internal/claudedir"
 	"github.com/ghulammuzz/clauzz-cli/internal/store"
 	"github.com/ghulammuzz/clauzz-cli/internal/tui"
 )
@@ -42,18 +44,41 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		if len(reg.Sessions) == 0 {
-			fmt.Println("no sessions registered yet")
-			fmt.Println("run `clauzz add {name}` inside a Claude session, or /clauzz:add-session {name} from Claude Code")
-			return nil
+
+		discover := func() ([]claudedir.Discovered, error) {
+			exclude := make(map[string]bool, len(reg.Sessions))
+			for _, e := range reg.Sessions {
+				exclude[e.SessionID] = true
+			}
+			return claudedir.Discover(exclude, 20)
 		}
 
-		result, err := tui.Run(reg.GroupedByDir())
+		// With an empty registry, open straight in discover mode so first-time
+		// users see their existing sessions instead of a dead end.
+		startAll := len(reg.Sessions) == 0
+		if startAll {
+			if found, err := discover(); err != nil || len(found) == 0 {
+				fmt.Println("no sessions registered yet, and none found to discover")
+				fmt.Println("run `clauzz add {name}` inside a Claude session, or /clauzz:add-session {name} from Claude Code")
+				return nil
+			}
+		}
+
+		result, err := tui.Run(reg.GroupedByDir(), discover, startAll)
 		if err != nil {
 			return err
 		}
 		if !result.Chosen {
 			return nil
+		}
+		if result.Discovered {
+			entry := result.Entry
+			entry.AddedAt = time.Now().UTC()
+			reg.Add(entry)
+			if err := reg.Save(); err != nil {
+				return fmt.Errorf("register discovered session: %w", err)
+			}
+			fmt.Printf("registered %q -> %s\n", entry.Name, store.ShortID(entry.SessionID))
 		}
 		return resumeSession(result.Entry)
 	},

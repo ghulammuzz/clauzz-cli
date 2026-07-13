@@ -196,6 +196,15 @@ func (r *Registry) GroupedByDir() []DirGroup {
 	return groups
 }
 
+// TruncateName caps a session name at n runes for column display.
+func TruncateName(name string, n int) string {
+	runes := []rune(name)
+	if len(runes) <= n {
+		return name
+	}
+	return string(runes[:n-1]) + "…"
+}
+
 // ShortID returns the display form of a session UUID (first 8 characters).
 func ShortID(sessionID string) string {
 	if len(sessionID) <= 8 {

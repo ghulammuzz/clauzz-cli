@@ -22,6 +22,7 @@ Which one was the webhook fix? No idea. You open three wrong sessions before you
 clauzz fixes that loop:
 
 - **Name your sessions**: `Task Kafka DLQ` instead of `3f2a8c1e-...` ([demo](#register-a-session-from-claude-code)).
+- **Discover old sessions**: press `a` in the picker to see unregistered sessions with their AI titles; pick one and it is registered and resumed in one go.
 - **Resume in one keypress**: a picker grouped by directory; enter drops you back in via `claude --resume`, in the right project.
 - **Search everything**: "which session talked about idempotency keys?" answered from every transcript on your machine ([demo](#search-across-every-session)).
 - **Move context between sessions**: the DLQ session knows things your new session needs? `/clauzz:context` hands them over ([demo](#pull-context-from-another-session)).
@@ -78,9 +79,9 @@ That is the whole loop. `clauzz search {query}` and `/clauzz:context {id} [focus
 
 | Command | What it does |
 |---------|--------------|
-| `clauzz` | Interactive picker; enter resumes the session via `claude --resume` in its directory |
+| `clauzz` | Interactive picker; enter resumes the session via `claude --resume` in its directory. Press `a` to also show unregistered sessions; picking one registers it under its AI title and resumes |
 | `clauzz add {name}` | Register the current Claude session under a custom name |
-| `clauzz list` | List registered sessions grouped by directory (`ls` works too) |
+| `clauzz list` | List registered sessions grouped by directory (`ls` works too); `--all` includes unregistered ones |
 | `clauzz search {query}` | Full-text search across every session on the machine |
 | `clauzz context {id-prefix} [focus...]` | Print the context digest of a session (powers `/clauzz:context`) |
 | `clauzz rename {id-prefix} {new-name}` | Rename a registered session |
