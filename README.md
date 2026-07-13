@@ -79,7 +79,7 @@ That is the whole loop. `clauzz search {query}` and `/clauzz:context {id} [focus
 
 | Command | What it does |
 |---------|--------------|
-| `clauzz` | Interactive picker; enter resumes the session via `claude --resume` in its directory. Press `a` to also show unregistered sessions; picking one registers it under its AI title and resumes |
+| `clauzz` | Interactive picker; enter resumes the session via `claude --resume` in its directory. `/` fuzzy-filters, `a` also shows unregistered sessions; picking one registers it under its AI title and resumes |
 | `clauzz add {name}` | Register the current Claude session under a custom name |
 | `clauzz list` | List registered sessions grouped by directory (`ls` works too); `--all` includes unregistered ones |
 | `clauzz search {query}` | Full-text search across every session on the machine |

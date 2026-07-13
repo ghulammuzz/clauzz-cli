@@ -55,6 +55,9 @@ type model struct {
 	loaded     bool
 	showAll    bool
 
+	filtering bool
+	query     string
+
 	items  []item
 	cursor int
 	status string
@@ -142,8 +145,48 @@ func (m *model) rebuild() {
 		appendDiscovered(dir)
 	}
 
-	m.items = items
-	m.cursor = firstSelectable(items)
+	m.items = filterItems(items, m.query)
+	m.cursor = firstSelectable(m.items)
+}
+
+// filterItems keeps entries fuzzy-matching query (against name, directory,
+// and session id) and drops directory headers left without entries.
+func filterItems(items []item, query string) []item {
+	if strings.TrimSpace(query) == "" {
+		return items
+	}
+	var out []item
+	for _, it := range items {
+		if it.isHeader {
+			// Drop the previous header if nothing matched under it.
+			if len(out) > 0 && out[len(out)-1].isHeader {
+				out = out[:len(out)-1]
+			}
+			out = append(out, it)
+			continue
+		}
+		target := it.entry.Name + " " + it.entry.Dir + " " + it.entry.SessionID
+		if fuzzyMatch(query, target) {
+			out = append(out, it)
+		}
+	}
+	if len(out) > 0 && out[len(out)-1].isHeader {
+		out = out[:len(out)-1]
+	}
+	return out
+}
+
+// fuzzyMatch reports whether query is a case-insensitive subsequence of
+// target, e.g. "kdlq" matches "Task Kafka DLQ".
+func fuzzyMatch(query, target string) bool {
+	q := []rune(strings.ToLower(query))
+	i := 0
+	for _, r := range strings.ToLower(target) {
+		if i < len(q) && r == q[i] {
+			i++
+		}
+	}
+	return i == len(q)
 }
 
 func firstSelectable(items []item) int {
@@ -164,9 +207,51 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if !ok {
 		return m, nil
 	}
+
+	if m.filtering {
+		switch key.String() {
+		case "ctrl+c":
+			return m, tea.Quit
+		case "esc":
+			m.filtering = false
+			m.query = ""
+			m.rebuild()
+		case "enter":
+			m.filtering = false
+		case "backspace":
+			if r := []rune(m.query); len(r) > 0 {
+				m.query = string(r[:len(r)-1])
+				m.rebuild()
+			}
+		case "up", "down":
+			// Allow picking while typing.
+			dir := 1
+			if key.String() == "up" {
+				dir = -1
+			}
+			m.cursor = m.move(dir)
+		default:
+			if key.Type == tea.KeyRunes || key.Type == tea.KeySpace {
+				m.query += key.String()
+				m.rebuild()
+			}
+		}
+		return m, nil
+	}
+
 	switch key.String() {
-	case "q", "esc", "ctrl+c":
+	case "q", "ctrl+c":
 		return m, tea.Quit
+	case "esc":
+		if m.query != "" {
+			m.query = ""
+			m.rebuild()
+			return m, nil
+		}
+		return m, tea.Quit
+	case "/":
+		m.filtering = true
+		m.status = ""
 	case "up", "k":
 		m.cursor = m.move(-1)
 		m.status = ""
@@ -223,12 +308,22 @@ func (m model) View() string {
 	if len(m.items) == 0 {
 		b.WriteString("  " + dimStyle.Render("nothing to show") + "\n")
 	}
+	if m.filtering || m.query != "" {
+		prompt := "  / " + m.query
+		if m.filtering {
+			prompt += "▌"
+		}
+		b.WriteString("\n" + statusStyle.Render(prompt) + "\n")
+	}
 	if m.status != "" {
 		b.WriteString("\n  " + statusStyle.Render(m.status) + "\n")
 	}
-	help := "enter resume · a show all · j/k move · q quit"
-	if m.showAll {
-		help = "enter register + resume · a registered only · j/k move · q quit"
+	help := "enter resume · a show all · / filter · j/k move · q quit"
+	switch {
+	case m.filtering:
+		help = "type to filter · enter keep · esc clear · arrows move"
+	case m.showAll:
+		help = "enter register + resume · a registered only · / filter · j/k move · q quit"
 	}
 	b.WriteString("\n  " + helpStyle.Render(help) + "\n")
 	return b.String()
