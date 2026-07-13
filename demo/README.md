@@ -37,6 +37,7 @@ Each run builds the current code and re-executes the real commands against the f
 | `search.tape` | `clauzz search kafka`, `clauzz search dead letter queue` | Full-text search across every session on the machine |
 | `context.tape` | `clauzz ls`, `clauzz context {id} {focus query}` | The digest `/clauzz:context` injects into an active session |
 | `add-session.tape` | `claude`, `/clauzz:add-session Demo Session`, `clauzz ls` | Registering a session from inside Claude Code |
+| `tags.tape` | `clauzz tag`, `clauzz ls --tag`, `clauzz context --tag` | Grouping one initiative across sessions and pulling it as one digest |
 
 `add-session.tape` is the exception to the fixture rule: it launches the real Claude Code TUI (requires `claude` installed and logged in) and uses a throwaway `CLAUZZ_HOME`, so your real registry stays untouched.
 Note that the recording shows your Claude Code welcome screen (account name and plan), so review the GIF before publishing.

@@ -127,6 +127,13 @@ Type `/clauzz:context {id-prefix} [what you want from it]` and Claude loads a di
 
 ![clauzz context demo](demo/context.gif)
 
+### Group an initiative with tags
+
+One piece of work rarely stays in one repo: the consumer lives in `shop-api`, the fix touches `shop-web` too.
+Tag the related sessions and pull the whole initiative as a single combined digest with `clauzz context --tag` (or `/clauzz:context --tag {tag}` inside Claude Code):
+
+![clauzz tags demo](demo/tags.gif)
+
 ### Search across every session
 
 "Which session talked about kafka?" `clauzz search` answers from every transcript on the machine, registered in clauzz or not.
