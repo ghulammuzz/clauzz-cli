@@ -80,9 +80,10 @@ That is the whole loop. Once sessions pile up, `clauzz search {query}` finds the
 |---------|--------------|
 | `clauzz` | Interactive picker; enter resumes the session via `claude --resume` in its directory. `/` fuzzy-filters, `a` also shows unregistered sessions; picking one registers it under its AI title and resumes |
 | `clauzz add {name}` | Register the current Claude session under a custom name |
-| `clauzz list` | List registered sessions grouped by directory (`ls` works too); `--all` includes unregistered ones |
+| `clauzz list` | List registered sessions grouped by directory (`ls` works too); `--all` includes unregistered ones, `--tag` filters |
 | `clauzz search {query}` | Full-text search across every session on the machine |
-| `clauzz context {id-prefix} [focus...]` | Print the context digest of a session (powers `/clauzz:context`) |
+| `clauzz context {id-prefix} [focus...]` | Print the context digest of a session (powers `/clauzz:context`); `--tag` digests a whole initiative at once |
+| `clauzz tag {id-prefix} {tag...}` | Tag a session; `untag` removes. One initiative often spans repos, tags tie it together |
 | `clauzz rename {id-prefix} {new-name}` | Rename a registered session |
 | `clauzz rm {id-prefix}` | Remove a session from the registry (`delete` works too) |
 | `clauzz archive` | Snapshot all registered sessions so their context survives Claude's transcript cleanup |
@@ -140,6 +141,7 @@ Type `/clauzz:context {id-prefix} [what you want from it]` and Claude loads a di
 - Entries whose transcript was deleted without an archive show `[gone]` and cannot be resumed; clean them up with `clauzz rm` or `clauzz prune`.
 - The context digest carries the source session's title, every user prompt, and the last 20 messages (truncated).
   With a focus query, Claude also greps the source transcript for that topic and loads only the relevant parts.
+- Tags group sessions across directories: `clauzz tag 3f2a payments-rework` on each related session, then `clauzz context --tag payments-rework` (also via `/clauzz:context --tag payments-rework`) pulls the whole initiative into the current session.
 
 ### Context transfer flow
 

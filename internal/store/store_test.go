@@ -165,6 +165,61 @@ func TestGroupedByDir(t *testing.T) {
 	}
 }
 
+func TestTags(t *testing.T) {
+	newRegistry := func() *Registry {
+		r := &Registry{Version: 1}
+		r.Add(entry("api", "aaa-111", "/app", time.Now().Add(-time.Hour)))
+		r.Add(entry("web", "bbb-222", "/web", time.Now()))
+		return r
+	}
+
+	t.Run("tag normalizes, dedupes, sorts", func(t *testing.T) {
+		r := newRegistry()
+		got, err := r.TagByPrefix("aaa-", []string{" Kafka-DLQ ", "zeta", "kafka-dlq", ""})
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := []string{"kafka-dlq", "zeta"}
+		if len(got.Tags) != 2 || got.Tags[0] != want[0] || got.Tags[1] != want[1] {
+			t.Errorf("tags = %v, want %v", got.Tags, want)
+		}
+	})
+
+	t.Run("untag", func(t *testing.T) {
+		r := newRegistry()
+		if _, err := r.TagByPrefix("aaa-", []string{"x", "y"}); err != nil {
+			t.Fatal(err)
+		}
+		got, err := r.UntagByPrefix("aaa-", "X")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(got.Tags) != 1 || got.Tags[0] != "y" {
+			t.Errorf("tags = %v", got.Tags)
+		}
+	})
+
+	t.Run("ByTag newest first across dirs", func(t *testing.T) {
+		r := newRegistry()
+		r.TagByPrefix("aaa-", []string{"init"})
+		r.TagByPrefix("bbb-", []string{"init"})
+		got := r.ByTag("INIT")
+		if len(got) != 2 || got[0].Name != "web" || got[1].Name != "api" {
+			t.Errorf("ByTag = %+v", got)
+		}
+		if len(r.ByTag("nope")) != 0 {
+			t.Error("unknown tag must match nothing")
+		}
+	})
+
+	t.Run("HasTag", func(t *testing.T) {
+		e := Entry{Tags: []string{"kafka"}}
+		if !e.HasTag("Kafka") || e.HasTag("web") {
+			t.Errorf("HasTag mismatch: %+v", e.Tags)
+		}
+	})
+}
+
 func TestRemoveIf(t *testing.T) {
 	r := &Registry{Version: 1}
 	r.Add(entry("keep", "aaa-1", "/app", time.Now()))

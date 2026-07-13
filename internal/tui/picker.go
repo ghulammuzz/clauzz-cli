@@ -169,7 +169,7 @@ func filterItems(items []item, query string) []item {
 			out = append(out, it)
 			continue
 		}
-		target := it.entry.Name + " " + it.entry.Dir + " " + it.entry.SessionID
+		target := it.entry.Name + " " + it.entry.Dir + " " + it.entry.SessionID + " " + strings.Join(it.entry.Tags, " ")
 		if fuzzyMatch(query, target) {
 			out = append(out, it)
 		}
@@ -340,6 +340,9 @@ func (m model) View() string {
 func (m model) renderRow(i int, it item) string {
 	line := fmt.Sprintf("%-30s %-10s %s",
 		store.TruncateName(it.entry.Name, 30), store.ShortID(it.entry.SessionID), rowAge(it))
+	for _, tag := range it.entry.Tags {
+		line += "  " + dimStyle.Render("#"+tag)
+	}
 	if it.discovered {
 		line += "  " + newStyle.Render("[new]")
 	}

@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -26,10 +27,20 @@ var listCmd = &cobra.Command{
 		}
 
 		for _, group := range reg.GroupedByDir() {
-			fmt.Println(group.Dir)
+			printed := false
 			for _, e := range group.Entries {
+				if listTag != "" && !e.HasTag(listTag) {
+					continue
+				}
+				if !printed {
+					fmt.Println(group.Dir)
+					printed = true
+				}
 				line := fmt.Sprintf("  %-30s %-10s %s",
-					e.Name, store.ShortID(e.SessionID), e.AddedAt.Local().Format("2006-01-02 15:04"))
+					store.TruncateName(e.Name, 30), store.ShortID(e.SessionID), e.AddedAt.Local().Format("2006-01-02 15:04"))
+				if len(e.Tags) > 0 {
+					line += "  #" + strings.Join(e.Tags, "  #")
+				}
 				if !claudedir.SessionExists(e.Dir, e.SessionID) {
 					if archive.Exists(e.SessionID) {
 						line += "  [archived]"
@@ -64,9 +75,13 @@ var listCmd = &cobra.Command{
 	},
 }
 
-var listAll bool
+var (
+	listAll bool
+	listTag string
+)
 
 func init() {
 	listCmd.Flags().BoolVar(&listAll, "all", false, "also show unregistered sessions")
+	listCmd.Flags().StringVar(&listTag, "tag", "", "only show sessions with this tag")
 	rootCmd.AddCommand(listCmd)
 }

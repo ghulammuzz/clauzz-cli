@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -24,6 +25,17 @@ type Entry struct {
 	SessionID string    `json:"sessionId"`
 	Dir       string    `json:"dir"`
 	AddedAt   time.Time `json:"addedAt"`
+	Tags      []string  `json:"tags,omitempty"`
+}
+
+// HasTag reports whether the entry carries tag (tags are stored normalized).
+func (e Entry) HasTag(tag string) bool {
+	return slices.Contains(e.Tags, NormalizeTag(tag))
+}
+
+// NormalizeTag lowercases and trims a tag.
+func NormalizeTag(tag string) string {
+	return strings.ToLower(strings.TrimSpace(tag))
 }
 
 // Registry is the on-disk document.
@@ -156,6 +168,58 @@ func (r *Registry) RenameByPrefix(prefix, newName string) (Entry, error) {
 	}
 	r.Sessions[i].Name = newName
 	return r.Sessions[i], nil
+}
+
+// TagByPrefix adds tags to the single entry whose SessionID starts with
+// prefix and returns the updated entry. Empty tags are ignored.
+func (r *Registry) TagByPrefix(prefix string, tags []string) (Entry, error) {
+	i, err := r.indexByPrefix(prefix)
+	if err != nil {
+		return Entry{}, err
+	}
+	for _, tag := range tags {
+		tag = NormalizeTag(tag)
+		if tag == "" || r.Sessions[i].HasTag(tag) {
+			continue
+		}
+		r.Sessions[i].Tags = append(r.Sessions[i].Tags, tag)
+	}
+	sort.Strings(r.Sessions[i].Tags)
+	return r.Sessions[i], nil
+}
+
+// UntagByPrefix removes one tag from the matching entry.
+func (r *Registry) UntagByPrefix(prefix, tag string) (Entry, error) {
+	i, err := r.indexByPrefix(prefix)
+	if err != nil {
+		return Entry{}, err
+	}
+	tag = NormalizeTag(tag)
+	kept := r.Sessions[i].Tags[:0]
+	for _, t := range r.Sessions[i].Tags {
+		if t != tag {
+			kept = append(kept, t)
+		}
+	}
+	if len(kept) == 0 {
+		r.Sessions[i].Tags = nil
+	} else {
+		r.Sessions[i].Tags = kept
+	}
+	return r.Sessions[i], nil
+}
+
+// ByTag returns all entries carrying tag, newest first.
+func (r *Registry) ByTag(tag string) []Entry {
+	tag = NormalizeTag(tag)
+	var out []Entry
+	for _, e := range r.Sessions {
+		if e.HasTag(tag) {
+			out = append(out, e)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].AddedAt.After(out[j].AddedAt) })
+	return out
 }
 
 // RemoveIf removes every entry matching pred and returns the removed entries.

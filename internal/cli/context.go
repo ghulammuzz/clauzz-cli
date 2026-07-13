@@ -15,6 +15,7 @@ import (
 var (
 	contextLast     int
 	contextMaxChars int
+	contextTag      string
 )
 
 var contextCmd = &cobra.Command{
@@ -27,6 +28,30 @@ var contextCmd = &cobra.Command{
 		"When the live transcript is gone, the digest is served from the archive.",
 	Args: cobra.ArbitraryArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		reg, err := store.Load()
+		if err != nil {
+			return err
+		}
+
+		// --tag mode: one combined digest for every session in the initiative.
+		if contextTag != "" {
+			focus := strings.TrimSpace(strings.Join(args, " "))
+			entries := reg.ByTag(contextTag)
+			if len(entries) == 0 {
+				return fmt.Errorf("no sessions tagged %q", store.NormalizeTag(contextTag))
+			}
+			fmt.Printf("# Combined context for tag #%s (%d sessions)\n\n", store.NormalizeTag(contextTag), len(entries))
+			for i, entry := range entries {
+				if i > 0 {
+					fmt.Print("\n---\n\n")
+				}
+				if err := printDigest(entry, focus); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+
 		if len(args) == 0 {
 			return cmd.Help()
 		}
@@ -34,11 +59,6 @@ var contextCmd = &cobra.Command{
 		focus := strings.TrimSpace(strings.Join(args[1:], " "))
 		if len(prefix) < 4 {
 			return fmt.Errorf("prefix %q too short, use at least 4 characters", prefix)
-		}
-
-		reg, err := store.Load()
-		if err != nil {
-			return err
 		}
 		entry, err := reg.FindByPrefix(prefix)
 		if err != nil {
@@ -92,5 +112,6 @@ func printDigest(entry store.Entry, focus string) error {
 func init() {
 	contextCmd.Flags().IntVar(&contextLast, "last", 20, "number of trailing messages to include")
 	contextCmd.Flags().IntVar(&contextMaxChars, "max-chars", 500, "per-message truncation length")
+	contextCmd.Flags().StringVar(&contextTag, "tag", "", "digest every session with this tag instead of one prefix")
 	rootCmd.AddCommand(contextCmd)
 }
