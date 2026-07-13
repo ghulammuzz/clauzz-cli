@@ -9,8 +9,6 @@
 
 **Workspace context manager for AI coding agents.**
 
-![clauzz demo](demo/demo.gif)
-
 ## Why
 
 clauzz was born from a very normal week at work: a bunch of microservices, and a separate Claude Code session for each fire.
