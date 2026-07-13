@@ -79,6 +79,11 @@ var rootCmd = &cobra.Command{
 				return fmt.Errorf("register discovered session: %w", err)
 			}
 			fmt.Printf("registered %q -> %s\n", entry.Name, store.ShortID(entry.SessionID))
+			// Same guarantee as clauzz add: adopted sessions are archived so
+			// their context survives transcript cleanup.
+			if err := archiveEntry(entry); err != nil {
+				fmt.Printf("warning: could not archive session: %v\n", err)
+			}
 		}
 		return resumeSession(result.Entry)
 	},

@@ -20,10 +20,11 @@ Which one was the webhook fix? No idea. You open three wrong sessions before you
 clauzz fixes that loop:
 
 - **Name your sessions**: `Task Kafka DLQ` instead of `3f2a8c1e-...` ([demo](#register-a-session-from-claude-code)).
-- **Discover old sessions**: press `a` in the picker to see unregistered sessions with their AI titles; pick one and it is registered and resumed in one go.
-- **Resume in one keypress**: a picker grouped by directory; enter drops you back in via `claude --resume`, in the right project ([demo](#pick-a-session-with-clauzz)).
-- **Search everything**: "which session talked about idempotency keys?" answered from every transcript on your machine ([demo](#search-across-every-session)).
+- **Resume in one keypress**: a picker grouped by directory; enter drops you back in via `claude --resume`, in the right project. `/` fuzzy-filters, `a` reveals unregistered sessions to adopt ([demo](#pick-a-session-with-clauzz)).
 - **Move context between sessions**: the DLQ session knows things your new session needs? `/clauzz:context` hands them over ([demo](#pull-context-from-another-session)).
+- **Tag an initiative**: one piece of work spans several repos; tag its sessions and pull them all as one combined digest ([demo](#group-an-initiative-with-tags)).
+- **Search everything**: "which session talked about idempotency keys?" answered from every transcript on your machine ([demo](#search-across-every-session)).
+- **Never lose context**: registered sessions are snapshotted to an archive, so their context outlives Claude's transcript cleanup.
 - **All without leaving Claude Code**: register, list, and pull context via slash commands.
 
 Claude Code today; adapters for other agents are on the roadmap.
@@ -63,11 +64,22 @@ mkdir -p ~/.claude/commands/clauzz && cp claude-command/*.md ~/.claude/commands/
 
 ## Quick start
 
+Work as usual, then name the session before you leave - typed inside Claude Code:
+
+```text
+/clauzz:add-session Payment Fix
+```
+
+Next day, back in the terminal:
+
 ```sh
-cd your-project && claude                  # 1. work as usual
-/clauzz:add-session Payment Fix            # 2. name the session before you leave
-clauzz                                     # 3. next day: pick it, hit enter, keep going
-/clauzz:context 8b91 retry decisions       # 4. new session needs what the old one knows? pull it in
+clauzz    # pick "Payment Fix", hit enter, keep going
+```
+
+A fresh session needs what the old one knows? Inside Claude Code (id prefix from `clauzz ls`):
+
+```text
+/clauzz:context 8b91 retry decisions
 ```
 
 That is the whole loop. Once sessions pile up, `clauzz search {query}` finds the one you forgot to name.
@@ -97,7 +109,7 @@ Session ID prefixes need at least 4 characters.
 |---------|--------------|
 | `/clauzz:add-session {name}` | Register the current session under a custom name |
 | `/clauzz:list` | Show registered sessions |
-| `/clauzz:context {id-prefix} [focus query]` | Load another session's context into this one |
+| `/clauzz:context {id-prefix} [focus query]` | Load another session's context into this one; `--tag {tag}` loads a whole initiative |
 
 ## Demos
 

@@ -1,6 +1,8 @@
-# clauzz overview demo: list + interactive picker.
+# clauzz picker demo: fuzzy filter, discover, resume.
 # Render from the repository root with:  vhs demo/demo.tape
-# Runs against the synthetic fixture in demo/fixture (see demo/README.md).
+# Runs against the synthetic fixture in demo/fixture (see demo/README.md);
+# the registry is copied to a throwaway CLAUZZ_HOME so adopting a session
+# in the demo never dirties the committed fixture.
 
 Output demo/demo.gif
 
@@ -17,26 +19,33 @@ Set TypingSpeed 55ms
 Hide
 Type `go build -o clauzz ./cmd/clauzz`
 Enter
-Type `export PATH="$PWD:$PATH" CLAUZZ_HOME="$PWD/demo/fixture/clauzz" CLAUZZ_CLAUDE_DIR="$PWD/demo/fixture/claude"`
+Type `export PATH="$PWD:$PATH" CLAUZZ_HOME="$(mktemp -d)" CLAUZZ_CLAUDE_DIR="$PWD/demo/fixture/claude"`
+Enter
+Type `cp demo/fixture/clauzz/sessions.json "$CLAUZZ_HOME/"`
 Enter
 Type "clear"
 Enter
 Show
 
-# --- list registered sessions ----------------------------------------------
-Type "clauzz ls"
-Enter
-Sleep 3s
-
-# --- interactive picker: browse, then quit ----------------------------------
+# --- open the picker ---------------------------------------------------------
 Type "clauzz"
 Enter
+Sleep 2.5s
+
+# --- fuzzy filter: type / and a few letters ----------------------------------
+Type "/"
+Sleep 800ms
+Type "webhook"
+Sleep 2.5s
+Escape
 Sleep 1.5s
-Down@600ms 3
-Sleep 1s
-Up@600ms 1
+
+# --- discover: reveal unregistered sessions ----------------------------------
+Type "a"
+Sleep 2.5s
+Down@500ms 3
 Sleep 2s
-# quitting instead of resuming: pressing enter would exec `claude --resume`
-# and take over the recording
+
+# --- quit (enter would exec claude --resume and take over the recording) -----
 Type "q"
 Sleep 1.5s
