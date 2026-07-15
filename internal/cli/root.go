@@ -23,7 +23,14 @@ import (
 // For go install builds it falls back to the module version from build info.
 var version = "dev"
 
+// skipPermissions forwards --dangerously-skip-permissions to claude on
+// resume. Same risk profile as using that flag directly: Claude runs tools
+// without asking. Off by default.
+var skipPermissions bool
+
 func init() {
+	rootCmd.Flags().BoolVar(&skipPermissions, "dasp", false,
+		"resume with --dangerously-skip-permissions (claude asks for no tool permissions; use with care)")
 	if version != "dev" {
 		return
 	}
@@ -100,7 +107,16 @@ func resumeSession(e store.Entry) error {
 	if err := os.Chdir(e.Dir); err != nil {
 		return fmt.Errorf("session directory gone: %w", err)
 	}
-	return syscall.Exec(claudePath, []string{"claude", "--resume", e.SessionID}, os.Environ())
+	return syscall.Exec(claudePath, resumeArgs(e.SessionID, skipPermissions), os.Environ())
+}
+
+// resumeArgs builds the claude argv for resuming a session.
+func resumeArgs(sessionID string, skipPerms bool) []string {
+	argv := []string{"claude", "--resume", sessionID}
+	if skipPerms {
+		argv = append(argv, "--dangerously-skip-permissions")
+	}
+	return argv
 }
 
 // Execute runs the CLI and returns the process exit code.

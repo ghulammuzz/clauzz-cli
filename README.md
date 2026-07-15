@@ -91,6 +91,7 @@ That is the whole loop. Once sessions pile up, `clauzz search {query}` finds the
 | Command | What it does |
 |---------|--------------|
 | `clauzz` | Interactive picker; enter resumes the session via `claude --resume` in its directory. `/` fuzzy-filters, `a` also shows unregistered sessions; picking one registers it under its AI title and resumes |
+| `clauzz --dasp` | Same picker, but resumes with `--dangerously-skip-permissions` (Claude asks for no tool permissions; use with care) |
 | `clauzz add {name}` | Register the current Claude session under a custom name |
 | `clauzz list` | List registered sessions grouped by directory (`ls` works too); `--all` includes unregistered ones, `--tag` filters |
 | `clauzz search {query}` | Full-text search across every session on the machine |
